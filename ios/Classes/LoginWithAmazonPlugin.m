@@ -1,5 +1,7 @@
 #import "LoginWithAmazonPlugin.h"
 
+#import <LoginWithAmazon/LoginWithAmazon.h>
+
 @implementation LoginWithAmazonPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -10,8 +12,29 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"getPlatformVersion" isEqualToString:call.method]) {
-    result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
+  if ([@"login" isEqualToString:call.method]) {
+      AMZNAuthorizeRequest *request = [[AMZNAuthorizeRequest alloc] init];
+      request.scopes = [NSArray arrayWithObjects:
+                        [AMZNProfileScope userID],
+                        [AMZNProfileScope profile],
+                        nil
+                        ];
+      
+      [[AMZNAuthorizationManager sharedManager] authorize:request
+                                              withHandler:^(AMZNAuthorizeResult *amznResult, BOOL
+                                                            userDidCancel, NSError *error) {
+                                                  if (error) {
+                                                      result([FlutterError errorWithCode:@"login" message:@"error" details:nil]);
+                                                  } else if (userDidCancel) {
+                                                      result(nil);
+                                                  } else {
+//                                                      NSString *accessToken = amznResult.token;
+                                                      AMZNUser *user = amznResult.user;
+//                                                      NSString *userID = user.userID;
+                                                      
+                                                      result(user.email);
+                                                  }
+                                              }];
   } else {
     result(FlutterMethodNotImplemented);
   }

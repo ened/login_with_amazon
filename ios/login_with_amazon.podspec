@@ -16,6 +16,8 @@ A new flutter plugin project.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
 
+  s.ios.frameworks      = 'Security', 'SafariServices'
   s.ios.deployment_target = '8.0'
+  s.ios.vendored_frameworks = 'Frameworks/LoginWithAmazon.framework'
 end
 

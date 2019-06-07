@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>APIKey</key>
+	<string>eyJhbGciOiJSU0EtU0hBMjU2IiwidmVyIjoiMSJ9.eyJ2ZXIiOiIzIiwiZW5kcG9pbnRzIjp7ImF1dGh6IjoiaHR0cHM6Ly93d3cuYW1hem9uLmNvbS9hcC9vYSIsInRva2VuRXhjaGFuZ2UiOiJodHRwczovL2FwaS5hbWF6b24uY29tL2F1dGgvbzIvdG9rZW4ifSwiY2xpZW50SWQiOiJhbXpuMS5hcHBsaWNhdGlvbi1vYTItY2xpZW50LjE4ODBjNTMzNTZkODQ1N2FhN2M0MWQ4ODNiNWFiZDNiIiwiYXBwRmFtaWx5SWQiOiJhbXpuMS5hcHBsaWNhdGlvbi42YmE2MTQxNTI5MGY0MjlkYTIyZGJiMmZjN2Q5ODY3OCIsImJ1bmRsZVNlZWRJZCI6ImNvbS5naXRodWIuZW5lZC5sb2dpbldpdGhBbWF6b25FeGFtcGxlIiwiYnVuZGxlSWQiOiJjb20uZ2l0aHViLmVuZWQubG9naW5XaXRoQW1hem9uRXhhbXBsZSIsImlzcyI6IkFtYXpvbiIsInR5cGUiOiJBUElLZXkiLCJhcHBWYXJpYW50SWQiOiJhbXpuMS5hcHBsaWNhdGlvbi1jbGllbnQuYzViMjc3ZTdkNTdlNDM4YjhkYjlmYzNiMTMyNDdmNmQiLCJ0cnVzdFBvb2wiOm51bGwsImFwcElkIjoiYW16bjEuYXBwbGljYXRpb24tY2xpZW50LmM1YjI3N2U3ZDU3ZTQzOGI4ZGI5ZmMzYjEzMjQ3ZjZkIiwiaWQiOiI5OGZlMmM1NC04OTFhLTExZTktYTNhMC1kYmMzZmQ2MzJhMmYiLCJpYXQiOiIxNTU5OTA4Mjk0MDcyIn0=.FtCJzuv63+g1gkvtt7W2WlzhPODYoBw9n3xPbyXeGPgUiSsZdDwZOJy97oB+lZJe/ylnDIxrHJlvuLUjNeaFsKb+N8ZVw/7SfHS6NCOaaFT6ImwanOviZGvJGe52H/ZsJicfRRc4xZsl9D9rLr0ea+O01INzjlwxRboe8v/HE5Cq9DqNAwlf6kDAncUnZtTSx0ndFM1jOpXNTUAWrmVxLgqSKdLSYGYed+YVMpfHa1yQiFR5qZyztKRvwItYBI7zPaPhEN2Vc99WB23g1fW06zgBkfSdOHpKFAOozh5U83S/d1Wykcsi5WmYGNCEfYaTrP3fg1Jdp2Q5ufh3D717rA==</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -18,6 +20,17 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>amzn-com.github.ened.loginWithAmazonExample</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
