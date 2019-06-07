@@ -19,6 +19,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.ViewDestroyListener;
 import io.flutter.view.FlutterNativeView;
+import io.flutter.view.FlutterView;
 
 /**
  * LoginWithAmazonPlugin
@@ -36,7 +37,11 @@ public class LoginWithAmazonPlugin implements ActivityLifecycleListener, MethodC
     LoginWithAmazonPlugin plugin = new LoginWithAmazonPlugin(registrar.context());
     channel.setMethodCallHandler(plugin);
     registrar.addViewDestroyListener(plugin);
-    registrar.view().addActivityLifecycleListener(plugin);
+
+    FlutterView flutterView = registrar.view();
+    if (flutterView != null) {
+      flutterView.addActivityLifecycleListener(plugin);
+    }
   }
 
   private final RequestContext requestContext;
