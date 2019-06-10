@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 import com.amazon.identity.auth.device.AuthError;
+import com.amazon.identity.auth.device.api.Listener;
 import com.amazon.identity.auth.device.api.authorization.AuthCancellation;
 import com.amazon.identity.auth.device.api.authorization.AuthorizationManager;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeListener;
@@ -95,6 +96,18 @@ public class LoginWithAmazonPlugin implements ActivityLifecycleListener, MethodC
           .Builder(requestContext)
           .addScopes(ProfileScope.profile(), ProfileScope.userId())
           .build());
+    } else if (call.method.equals("signOut")) {
+      AuthorizationManager.signOut(requestContext.getContext(), new Listener<Void, AuthError>() {
+        @Override
+        public void onSuccess(Void aVoid) {
+          mainThreadHandler.post(() -> result.success(null));
+        }
+
+        @Override
+        public void onError(AuthError authError) {
+          mainThreadHandler.post(() -> result.error("signOut", "error", null));
+        }
+      });
     } else {
       result.notImplemented();
     }
