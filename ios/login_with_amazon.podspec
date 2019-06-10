@@ -17,7 +17,7 @@ A new flutter plugin project.
   s.dependency 'Flutter'
 
   s.ios.frameworks      = 'Security', 'SafariServices'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
   s.ios.vendored_frameworks = 'Frameworks/LoginWithAmazon.framework'
 end
 
