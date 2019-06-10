@@ -17,7 +17,20 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Login With Amazon'),
+          actions: <Widget>[
+            if (_email?.isNotEmpty == true)
+              IconButton(
+                icon: Icon(Icons.exit_to_app),
+                onPressed: () {
+                  LoginWithAmazon().signOut().then((_) {
+                    setState(() {
+                      _email = '';
+                    });
+                  });
+                },
+              ),
+          ],
         ),
         body: Center(
           child: Text('eMail: $_email\n'),

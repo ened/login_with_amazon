@@ -6,8 +6,13 @@ class LoginWithAmazon {
   static const MethodChannel _channel =
       const MethodChannel('login_with_amazon');
 
-  /// Login &* return email
+  /// Login & return email
   Future<String> login() async {
     return await _channel.invokeMethod<String>('login');
+  }
+
+  /// Sign Out
+  Future<void> signOut() async {
+    return await _channel.invokeMethod<void>('signOut');
   }
 }
