@@ -35,11 +35,13 @@
                                                     } else if (userDidCancel) {
                                                         result(nil);
                                                     } else {
-                                                        //                                                      NSString *accessToken = amznResult.token;
+                                                        // NSString *accessToken = amznResult.token;
                                                         AMZNUser *user = amznResult.user;
-                                                        //                                                      NSString *userID = user.userID;
-                                                        
-                                                        result(user.email);
+
+                                                        result(@{
+                                                                 @"email": user.email,
+                                                                 @"userId": user.userID,
+                                                                 });
                                                     }
                                                 }];
     } else if ([@"signOut" isEqualToString:call.method]) {

@@ -10,7 +10,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _email = '';
+  AmazonUser _user;
 
   @override
   Widget build(BuildContext context) {
@@ -19,27 +19,33 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Login With Amazon'),
           actions: <Widget>[
-            if (_email?.isNotEmpty == true)
+            if (_user != null)
               IconButton(
                 icon: Icon(Icons.exit_to_app),
                 onPressed: () {
                   LoginWithAmazon().signOut().then((_) {
                     setState(() {
-                      _email = '';
+                      _user = null;
                     });
                   });
                 },
               ),
           ],
         ),
-        body: Center(
-          child: Text('eMail: $_email\n'),
+        body: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Center(
+            child: _user != null
+                ? Text('eMail: ${_user.email}, ${_user.userId}\n')
+                : Text('Please log in'),
+          ),
         ),
         floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.person_add),
           onPressed: () async {
-            final String email = await LoginWithAmazon().login();
+            final AmazonUser user = await LoginWithAmazon().login();
             setState(() {
-              _email = email;
+              _user = user;
             });
           },
         ),

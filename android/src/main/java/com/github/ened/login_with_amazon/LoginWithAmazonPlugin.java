@@ -11,6 +11,7 @@ import com.amazon.identity.auth.device.api.authorization.AuthorizeListener;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeRequest;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeResult;
 import com.amazon.identity.auth.device.api.authorization.ProfileScope;
+import com.amazon.identity.auth.device.api.authorization.User;
 import com.amazon.identity.auth.device.api.workflow.RequestContext;
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.MethodCall;
@@ -21,6 +22,8 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.ViewDestroyListener;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * LoginWithAmazonPlugin
@@ -56,9 +59,15 @@ public class LoginWithAmazonPlugin implements ActivityLifecycleListener, MethodC
       @Override
       public void onSuccess(final AuthorizeResult authorizeResult) {
         Log.d(TAG, "onSuccess: " + authorizeResult);
+        final User user = authorizeResult.getUser();
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("email", user.getUserEmail());
+        map.put("userId", user.getUserId());
+
         mainThreadHandler.post(() -> {
           if (authResult != null) {
-            authResult.success(authorizeResult.getUser().getUserEmail());
+            authResult.success(map);
             authResult = null;
           }
         });

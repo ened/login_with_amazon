@@ -1,18 +1,8 @@
-import 'dart:async';
+library login_with_amazon;
 
+import 'dart:async';
 import 'package:flutter/services.dart';
 
-class LoginWithAmazon {
-  static const MethodChannel _channel =
-      const MethodChannel('login_with_amazon');
+part 'src/model/amazon_user.dart';
 
-  /// Login & return email
-  Future<String> login() async {
-    return await _channel.invokeMethod<String>('login');
-  }
-
-  /// Sign Out
-  Future<void> signOut() async {
-    return await _channel.invokeMethod<void>('signOut');
-  }
-}
+part 'src/login_with_amazon.dart';
