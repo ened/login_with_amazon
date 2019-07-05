@@ -10,45 +10,76 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  AmazonUser _user;
+  final LoginWithAmazon _lwa = LoginWithAmazon();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Login With Amazon'),
-          actions: <Widget>[
-            if (_user != null)
-              IconButton(
-                icon: Icon(Icons.exit_to_app),
-                onPressed: () {
-                  LoginWithAmazon().signOut().then((_) {
-                    setState(() {
-                      _user = null;
-                    });
-                  });
-                },
+      home: StreamBuilder<AmazonUser>(
+        stream: _lwa.observeUsers,
+        builder: (context, userSnapshot) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('Login With Amazon'),
+                  FutureBuilder<String>(
+                    future: _lwa.getSdkVersion(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(
+                          'Version: ${snapshot.data}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .body1
+                              .apply(color: Colors.white),
+                        );
+                      }
+                      return SizedBox();
+                    },
+                  )
+                ],
               ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Center(
-            child: _user != null
-                ? Text('eMail: ${_user.email}, ${_user.userId}\n')
-                : Text('Please log in'),
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.person_add),
-          onPressed: () async {
-            final AmazonUser user = await LoginWithAmazon().login();
-            setState(() {
-              _user = user;
-            });
-          },
-        ),
+              actions: <Widget>[
+                if (userSnapshot.hasData && userSnapshot.data != null)
+                  IconButton(
+                    icon: Icon(Icons.exit_to_app),
+                    onPressed: () {
+                      _lwa.signOut();
+                    },
+                  ),
+              ],
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Center(
+                child: Builder(
+                  builder: (context) {
+                    if (userSnapshot.hasData && userSnapshot.data != null) {
+                      final user = userSnapshot.data;
+                      return Text('eMail: ${user.email}, ${user.userId}\n');
+                    }
+                    return Text('Please log in');
+                  },
+                ),
+              ),
+            ),
+            floatingActionButton:
+                !userSnapshot.hasData || userSnapshot.data == null
+                    ? FloatingActionButton(
+                        child: Icon(Icons.person_add),
+                        onPressed: () async {
+                          _lwa.login(scopes: [
+                            LoginWithAmazon.SCOPE_USER_ID,
+                            LoginWithAmazon.SCOPE_PROFILE,
+                          ]);
+                        },
+                      )
+                    : null,
+          );
+        },
       ),
     );
   }
