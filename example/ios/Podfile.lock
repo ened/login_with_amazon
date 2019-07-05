@@ -1,6 +1,6 @@
 PODS:
   - Flutter (1.0.0)
-  - login_with_amazon (0.0.1):
+  - login_with_amazon (0.0.2):
     - Flutter
 
 DEPENDENCIES:
@@ -15,8 +15,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
-  login_with_amazon: 2a59e124da4e297d48d52ae1391262104c3377c8
+  login_with_amazon: c48f12baa884897670cf2047e04c6b57f8d0717a
 
 PODFILE CHECKSUM: a876c2b5792c50fe23595b963e85cbecb327c802
 
-COCOAPODS: 1.7.1
+COCOAPODS: 1.7.3

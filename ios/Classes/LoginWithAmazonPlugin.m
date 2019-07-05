@@ -1,15 +1,27 @@
 #import "LoginWithAmazonPlugin.h"
 
+
 #import <LoginWithAmazon/LoginWithAmazon.h>
+
+@interface LoginWithAmazonPlugin ()
+@property (nonatomic) FlutterEventSink userStreamEventSink;
+@end
 
 @implementation LoginWithAmazonPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    FlutterMethodChannel* channel = [FlutterMethodChannel
-                                     methodChannelWithName:@"login_with_amazon"
-                                     binaryMessenger:[registrar messenger]];
     LoginWithAmazonPlugin* instance = [[LoginWithAmazonPlugin alloc] init];
-    [registrar addApplicationDelegate:instance];
+
+    FlutterMethodChannel* channel = [FlutterMethodChannel
+                                     methodChannelWithName:@"com.github.ened/login_with_amazon"
+                                     binaryMessenger:[registrar messenger]];
     [registrar addMethodCallDelegate:instance channel:channel];
+    
+    FlutterEventChannel *userChannel = [FlutterEventChannel
+                                        eventChannelWithName:@"com.github.ened/login_with_amazon/user"
+                                        binaryMessenger:[registrar messenger]];
+    [userChannel setStreamHandler:instance];
+    
+    [registrar addApplicationDelegate:instance];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
@@ -19,7 +31,9 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-    if ([@"login" isEqualToString:call.method]) {
+    if([@"version" isEqualToString:call.method]) {
+        result(AMZNLWASDKInfo.sdkVersion);
+    } else if ([@"login" isEqualToString:call.method]) {
         AMZNAuthorizeRequest *request = [[AMZNAuthorizeRequest alloc] init];
         request.scopes = [NSArray arrayWithObjects:
                           [AMZNProfileScope userID],
@@ -35,13 +49,13 @@
                                                     } else if (userDidCancel) {
                                                         result(nil);
                                                     } else {
-                                                        // NSString *accessToken = amznResult.token;
-                                                        AMZNUser *user = amznResult.user;
+                                                        NSDictionary *map = [self userToMap:amznResult.user];
+                                                        
+                                                        if (self.userStreamEventSink != nil) {
+                                                            self.userStreamEventSink(map);
+                                                        }
 
-                                                        result(@{
-                                                                 @"email": user.email,
-                                                                 @"userId": user.userID,
-                                                                 });
+                                                        result(map);
                                                     }
                                                 }];
     } else if ([@"signOut" isEqualToString:call.method]) {
@@ -49,6 +63,10 @@
             if (error) {
                 result([FlutterError errorWithCode:@"signOut" message:@"error" details:nil]);
             } else {
+                if (self.userStreamEventSink != nil) {
+                    self.userStreamEventSink(nil);
+                }
+
                 result(nil);
             }
         }];
@@ -68,5 +86,32 @@
 //
 //    return [NSString stringWithFormat:@"%@ version %@", name, version];
 //}
+
+- (FlutterError *)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)events {
+    self.userStreamEventSink = events;
+    
+    [AMZNUser fetch:^(AMZNUser * _Nullable user, NSError * _Nullable error) {
+        if (user != nil) {
+            self.userStreamEventSink([self userToMap:user]);
+        } else {
+            self.userStreamEventSink(nil);
+        }
+    }];
+  
+    return nil;
+}
+
+- (FlutterError *)onCancelWithArguments:(id)arguments {
+    self.userStreamEventSink = nil;
+    
+    return  nil;
+}
+
+- (NSDictionary*) userToMap:(AMZNUser*)user {
+    return @{
+             @"email": user.email,
+             @"userId": user.userID,
+             };
+}
 
 @end
