@@ -91,10 +91,12 @@
     self.userStreamEventSink = events;
     
     [AMZNUser fetch:^(AMZNUser * _Nullable user, NSError * _Nullable error) {
-        if (user != nil) {
-            self.userStreamEventSink([self userToMap:user]);
-        } else {
-            self.userStreamEventSink(nil);
+        if (self.userStreamEventSink != nil) {
+            if (user != nil) {
+                self.userStreamEventSink([self userToMap:user]);
+            } else {
+                self.userStreamEventSink(nil);
+            }
         }
     }];
   
