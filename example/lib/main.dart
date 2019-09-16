@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:login_with_amazon/login_with_amazon.dart';
 
 void main() => runApp(MyApp());
@@ -11,6 +10,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final LoginWithAmazon _lwa = LoginWithAmazon();
+
+  Authorization _authorization;
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +58,21 @@ class _MyAppState extends State<MyApp> {
               child: Center(
                 child: Builder(
                   builder: (context) {
-                    if (userSnapshot.hasData && userSnapshot.data != null) {
-                      final user = userSnapshot.data;
-                      return Text('eMail: ${user.email}, ${user.userId}\n');
-                    }
-                    return Text('Please log in');
+                    List<Widget> widgets = [
+                      if (userSnapshot.hasData &&
+                          userSnapshot.data != null) ...[
+                        Text('eMail: ${userSnapshot.data.email}'),
+                        Text('userId: ${userSnapshot.data.userId}\n'),
+                      ] else
+                        Text('Please log in'),
+                      if (_authorization != null)
+                        Text('Access Token: ${_authorization.accessToken}')
+                    ];
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: widgets,
+                    );
                   },
                 ),
               ),
@@ -71,10 +82,15 @@ class _MyAppState extends State<MyApp> {
                     ? FloatingActionButton(
                         child: Icon(Icons.person_add),
                         onPressed: () async {
-                          _lwa.login(scopes: [
+                          final auth = await _lwa.login(scopes: [
                             LoginWithAmazon.SCOPE_USER_ID,
                             LoginWithAmazon.SCOPE_PROFILE,
                           ]);
+                          if (mounted) {
+                            setState(() {
+                              _authorization = auth;
+                            });
+                          }
                         },
                       )
                     : null,
