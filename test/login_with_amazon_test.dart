@@ -3,11 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:login_with_amazon/login_with_amazon.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('login_with_amazon');
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  const MethodChannel channel =
+      MethodChannel('com.github.ened/login_with_amazon');
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
+      return '1.0.0';
     });
   });
 
@@ -15,7 +18,7 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    expect(await LoginWithAmazon.platformVersion, '42');
+  test('getSdkVersion', () async {
+    expect(await LoginWithAmazon().getSdkVersion(), '1.0.0');
   });
 }

@@ -12,6 +12,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  instrumentation_adapter: ^0.1.3
 
   login_with_amazon:
     path: ../
