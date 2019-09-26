@@ -207,6 +207,7 @@ public class LoginWithAmazonPlugin
             authMap.put("authorizationCode", authorizeResult.getAuthorizationCode());
             authMap.put("clientId", authorizeResult.getClientId());
             authMap.put("redirectURI", authorizeResult.getRedirectURI());
+            authMap.put("user", userToMap(authorizeResult.getUser()));
 
             mainThreadHandler.post(
                 () -> {

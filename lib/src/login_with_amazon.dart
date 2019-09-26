@@ -18,10 +18,7 @@ class LoginWithAmazon {
       _userStreamChannel.receiveBroadcastStream().map<AmazonUser>((map) {
         print('<<< $map');
         if (map != null) {
-          return AmazonUser(
-            email: map['email'],
-            userId: map['userId'],
-          );
+          return mapToAmazonUser(map);
         } else {
           return null;
         }
@@ -32,12 +29,7 @@ class LoginWithAmazon {
           .map<Authorization>((map) {
         print('<<< $map');
         if (map != null) {
-          return Authorization(
-            accessToken: map['accessToken'],
-            authorizationCode: map['authorizationCode'],
-            clientId: map['clientId'],
-            redirectURI: map['redirectURI'],
-          );
+          return mapToAuthorization(map);
         } else {
           return null;
         }
@@ -62,12 +54,7 @@ class LoginWithAmazon {
     });
 
     if (map != null) {
-      return Authorization(
-        accessToken: map['accessToken'],
-        authorizationCode: map['authorizationCode'],
-        clientId: map['clientId'],
-        redirectURI: map['redirectURI'],
-      );
+      return mapToAuthorization(map);
     }
 
     return null;
