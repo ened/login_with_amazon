@@ -3,7 +3,6 @@ package com.github.ened.login_with_amazon;
 import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -17,15 +16,13 @@ import com.amazon.identity.auth.device.api.authorization.AuthorizationManager;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeListener;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeRequest;
 import com.amazon.identity.auth.device.api.authorization.AuthorizeResult;
-import com.amazon.identity.auth.device.api.authorization.ProfileScope;
 import com.amazon.identity.auth.device.api.authorization.Scope;
 import com.amazon.identity.auth.device.api.authorization.ScopeFactory;
 import com.amazon.identity.auth.device.api.authorization.User;
 import com.amazon.identity.auth.device.api.workflow.RequestContext;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,19 +100,42 @@ public class LoginWithAmazonPlugin
 
         assert requestContext != null;
 
-        final List<Scope> scopes = parseScopes(Objects.requireNonNull(call.argument("scopes")));
+        final Map<String, Object> scopeArguments = Objects.requireNonNull(call.argument("scopes"));
 
-        List<String> scopeNames = new ArrayList<>();
-        for (Scope scope : scopes) {
-          scopeNames.add(scope.getName());
+        final String grantType = call.argument("grantType");
+
+        List<Scope> scopes = new ArrayList<>();
+
+        for (String name : scopeArguments.keySet()) {
+          Object tmp = scopeArguments.get(name);
+          if (tmp instanceof Map) {
+            Map scopeData = (Map) tmp;
+            scopes.add(ScopeFactory.scopeNamed(name, new JSONObject(scopeData)));
+          } else {
+            scopes.add(ScopeFactory.scopeNamed(name));
+          }
         }
 
-        Log.d(TAG, "Logging in with scopes: " + TextUtils.join(", ", scopeNames));
+        Log.d(TAG, "Logging in with scopes: " + TextUtils.join(", ", scopes));
 
-        AuthorizationManager.authorize(
-            new AuthorizeRequest.Builder(requestContext)
-                .addScopes(scopes.toArray(new Scope[] {}))
-                .build());
+        AuthorizeRequest.GrantType gt =
+            "access_token".equals(grantType)
+                ? AuthorizeRequest.GrantType.ACCESS_TOKEN
+                : AuthorizeRequest.GrantType.AUTHORIZATION_CODE;
+
+        Log.d(TAG, "grantType: " + grantType);
+
+        AuthorizeRequest.Builder builder =
+            new AuthorizeRequest.Builder(requestContext).forGrantType(gt);
+
+        builder.addScopes(scopes.toArray(new Scope[] {}));
+
+        if (gt == AuthorizeRequest.GrantType.AUTHORIZATION_CODE) {
+          builder.withProofKeyParameters(
+              call.argument("codeChallenge"), call.argument("codeChallengeMethod"));
+        }
+
+        AuthorizationManager.authorize(builder.build());
 
         break;
 
@@ -145,35 +165,6 @@ public class LoginWithAmazonPlugin
         result.notImplemented();
         break;
     }
-  }
-
-  private String generateCodeChallenge(String codeVerifier, String codeChallengeMethod)
-      throws NoSuchAlgorithmException {
-    String codeChallenge =
-        Base64.encodeToString(
-            MessageDigest.getInstance("SHA256").digest(codeVerifier.getBytes()),
-            Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
-    return codeChallenge;
-  }
-
-  private String generateCodeVerifier() {
-    byte[] randomOctetSequence = generateRandomOctetSequence();
-    String codeVerifier =
-        Base64.encodeToString(
-            randomOctetSequence, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
-    return codeVerifier;
-  }
-
-  /**
-   * * As per Proof Key/SPOP protocol Version 10 * @return a random 32 sized octet sequence from
-   * allowed range
-   */
-  private byte[] generateRandomOctetSequence() {
-    SecureRandom random = new SecureRandom();
-    byte[] octetSequence = new byte[32];
-    random.nextBytes(octetSequence);
-
-    return octetSequence;
   }
 
   @Override
@@ -261,12 +252,16 @@ public class LoginWithAmazonPlugin
         });
   }
 
-  private Map<String, Object> userToMap(User user) {
+  private Map<String, Object> userToMap(@Nullable User user) {
     final Map<String, Object> map = new HashMap<>();
-    map.put("email", user.getUserEmail());
-    map.put("name", user.getUserName());
-    map.put("postalCode", user.getUserPostalCode());
-    map.put("userId", user.getUserId());
+
+    if (user != null) {
+      map.put("email", user.getUserEmail());
+      map.put("name", user.getUserName());
+      map.put("postalCode", user.getUserPostalCode());
+      map.put("userId", user.getUserId());
+    }
+
     return map;
   }
 
@@ -298,24 +293,6 @@ public class LoginWithAmazonPlugin
                 });
           }
         });
-  }
-
-  private List<Scope> parseScopes(List<String> list) {
-    List<Scope> scopes = new ArrayList<>();
-
-    for (String str : list) {
-      if ("profile".equalsIgnoreCase(str)) {
-        scopes.add(ProfileScope.profile());
-      } else if ("userId".equalsIgnoreCase(str)) {
-        scopes.add(ProfileScope.userId());
-      } else if ("postalCode".equalsIgnoreCase(str)) {
-        scopes.add(ProfileScope.postalCode());
-      } else {
-        scopes.add(ScopeFactory.scopeNamed(str));
-      }
-    }
-
-    return scopes;
   }
 
   private final StreamHandler userStreamHandler =

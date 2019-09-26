@@ -1,10 +1,22 @@
 part of login_with_amazon;
 
-class LoginWithAmazon {
-  static const String SCOPE_USER_ID = 'userId';
-  static const String SCOPE_PROFILE = 'profile';
-  static const String SCOPE_POSTAL_CODE = 'postalCode';
+enum GrantType {
+  accessToken,
+  authorizationCode,
+}
 
+/// https://developer.amazon.com/it/docs/dash/lwa-mobile-sdk.html#prerequisites
+class ProofKeyParameters {
+  ProofKeyParameters({
+    @required this.codeChallenge,
+    @required this.codeChallengeMethod,
+  });
+
+  final String codeChallenge;
+  final String codeChallengeMethod;
+}
+
+class LoginWithAmazon {
   static const MethodChannel _channel =
       const MethodChannel('com.github.ened/login_with_amazon');
 
@@ -46,18 +58,34 @@ class LoginWithAmazon {
   /// Returns `null` if the login has been cancelled.
   Future<Authorization> login({
     /// List of scopes to request.
-    /// Must contain [SCOPE_USER_ID], [SCOPE_PROFILE] or [SCOPE_POSTAL_CODE].
-    List<String> scopes = const [],
-  }) async {
-    final map = await _channel.invokeMethod<Map<dynamic, dynamic>>('login', {
-      'scopes': scopes,
-    });
+    /// The client is responsible for picking the correct scope names.
+    Map<String, dynamic> scopes = const {},
 
-    if (map != null) {
-      return mapToAuthorization(map);
+    /// Grant Type
+    GrantType grantType = GrantType.accessToken,
+    ProofKeyParameters proofKeyParameters,
+  }) async {
+    assert(
+        grantType == GrantType.accessToken ||
+            (grantType == GrantType.authorizationCode &&
+                proofKeyParameters != null),
+        'You must set proofKeyParameters when using the authorization code grant type.');
+
+    var arguments = {
+      'scopes': scopes,
+      'grantType': grantType == GrantType.accessToken
+          ? 'access_token'
+          : 'authorization_code',
+    };
+
+    if (grantType == GrantType.authorizationCode) {
+      arguments['codeChallenge'] = proofKeyParameters.codeChallenge;
+      arguments['codeChallengeMethod'] = proofKeyParameters.codeChallengeMethod;
     }
 
-    return null;
+    return _channel
+        .invokeMethod<Map<dynamic, dynamic>>('login', arguments)
+        .then<Authorization>((map) => mapToAuthorization(map));
   }
 
   /// Sign Out

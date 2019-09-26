@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:login_with_amazon/src/converters.dart';
+import 'package:meta/meta.dart';
 
 part 'src/login_with_amazon.dart';
 
