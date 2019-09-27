@@ -35,24 +35,42 @@
         result(AMZNLWASDKInfo.sdkVersion);
     } else if ([@"login" isEqualToString:call.method]) {
         AMZNAuthorizeRequest *request = [[AMZNAuthorizeRequest alloc] init];
-        request.scopes = [NSArray arrayWithObjects:
-                          [AMZNProfileScope userID],
-                          [AMZNProfileScope profile],
-                          nil
-                          ];
+        
+        NSDictionary *arguments = call.arguments;
+        
+        NSDictionary *passedScopes = arguments[@"scopes"];
+        
+        NSMutableArray<AMZNScope>* scopeArray = [NSMutableArray<AMZNScope> new];
+        for (NSString* key in passedScopes.allKeys) {
+            if (passedScopes[@"key"] == [NSNull null]) {
+                [scopeArray addObject:[AMZNScopeFactory scopeWithName:key]];
+            } else {
+                NSDictionary *scopeParameters = passedScopes[@"key"];
+                [scopeArray addObject:[AMZNScopeFactory scopeWithName:key data:scopeParameters]];
+            }
+        }
+        
+        request.scopes = scopeArray;
+        
+        request.grantType = [arguments[@"grantType"] isEqualToString:@"access_token"] ? AMZNAuthorizationGrantTypeToken : AMZNAuthorizationGrantTypeCode;
+        
+        if (request.grantType == AMZNAuthorizationGrantTypeCode) {
+            request.codeChallenge = arguments[@"codeChallenge"];
+            request.codeChallengeMethod = arguments[@"codeChallengeMethod"];
+        }
         
         [[AMZNAuthorizationManager sharedManager] authorize:request
                                                 withHandler:^(AMZNAuthorizeResult *amznResult, BOOL
                                                               userDidCancel, NSError *error) {
                                                     if (error) {
-                                                        result([FlutterError errorWithCode:@"login" message:@"error" details:nil]);
+                                                        result([FlutterError errorWithCode:@"login" message:error.localizedDescription details:error.userInfo]);
                                                     } else if (userDidCancel) {
                                                         result(nil);
                                                     } else {
-                                                        NSDictionary *map = [self userToMap:amznResult.user];
+                                                        NSDictionary *map = [self authorizationToMap:amznResult];
                                                         
                                                         if (self.userStreamEventSink != nil) {
-                                                            self.userStreamEventSink(map);
+                                                            self.userStreamEventSink(map[@"user"]);
                                                         }
 
                                                         result(map);
@@ -77,16 +95,6 @@
     }
 }
 
-// Currently dead code as LoginWithAmazon framework does not contain info dictionary or version information.
-//- (NSString*) sdkVersion {
-//    NSDictionary *infoDictionary = [[NSBundle bundleForClass: [AMZNUser class]] infoDictionary];
-//
-//    NSString *name = [infoDictionary valueForKey:(__bridge NSString*)kCFBundleNameKey];
-//    NSString *version = [infoDictionary valueForKey:(__bridge NSString*)kCFBundleVersionKey];
-//
-//    return [NSString stringWithFormat:@"%@ version %@", name, version];
-//}
-
 - (FlutterError *)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)events {
     self.userStreamEventSink = events;
     
@@ -109,11 +117,47 @@
     return  nil;
 }
 
+- (NSDictionary*) authorizationToMap:(AMZNAuthorizeResult*)authorization {
+    NSMutableDictionary *dictionary = [NSMutableDictionary new];
+    
+    if (authorization.token) {
+        [dictionary setValue:authorization.token forKey:@"accessToken"];
+    }
+    if (authorization.authorizationCode) {
+        [dictionary setValue:authorization.authorizationCode forKey:@"authorizationCode"];
+    }
+    if (authorization.clientId) {
+        [dictionary setValue:authorization.clientId forKey:@"clientId"];
+    }
+    if (authorization.redirectUri) {
+        [dictionary setValue:authorization.redirectUri forKey:@"redirectURI"];
+    }
+
+    [dictionary setValue:[self userToMap:authorization.user] forKey:@"user"];
+
+    return dictionary;
+}
+
 - (NSDictionary*) userToMap:(AMZNUser*)user {
-    return @{
-             @"email": user.email,
-             @"userId": user.userID,
-             };
+    if (!user) {
+        return @{ };
+    }
+    
+    NSMutableDictionary *dictionary = [NSMutableDictionary new];
+    if (user.email) {
+        [dictionary setValue:user.email forKey:@"email"];
+    }
+    if (user.name) {
+        [dictionary setValue:user.name forKey:@"name"];
+    }
+    if (user.postalCode) {
+        [dictionary setValue:user.postalCode forKey:@"postalCode"];
+    }
+    if (user.userID) {
+        [dictionary setValue:user.userID forKey:@"userId"];
+    }
+    
+    return dictionary;
 }
 
 @end

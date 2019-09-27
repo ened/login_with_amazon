@@ -1,22 +1,28 @@
 PODS:
   - Flutter (1.0.0)
+  - instrumentation_adapter (0.0.1):
+    - Flutter
   - login_with_amazon (0.0.2):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
+  - instrumentation_adapter (from `.symlinks/plugins/instrumentation_adapter/ios`)
   - login_with_amazon (from `.symlinks/plugins/login_with_amazon/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: ".symlinks/flutter/ios"
+  instrumentation_adapter:
+    :path: ".symlinks/plugins/instrumentation_adapter/ios"
   login_with_amazon:
     :path: ".symlinks/plugins/login_with_amazon/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  instrumentation_adapter: 2e9153f1e4bbc0b9402558c06a6d164c84de541f
   login_with_amazon: c48f12baa884897670cf2047e04c6b57f8d0717a
 
 PODFILE CHECKSUM: a876c2b5792c50fe23595b963e85cbecb327c802
 
-COCOAPODS: 1.7.3
+COCOAPODS: 1.8.0

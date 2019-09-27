@@ -125,15 +125,16 @@ class _MyAppState extends State<MyApp> {
 
     final auth = await _lwa.login(
       scopes: {
-        'alexa:voice_service:pre_auth' : null,
-        "alexa:all": {
-          // TODO: Retrieve from AVS.
-          'productID': '',
-          'productInstanceAttributes': {
-            // TODO: Should be unique to a device.
-            'deviceSerialNumber': '',
-          }
-        },
+        'alexa::skills:account_linking': null,
+//        'alexa:voice_service:pre_auth' : null,
+//        "alexa:all": {
+//          // TODO: Retrieve from AVS.
+//          'productID': '',
+//          'productInstanceAttributes': {
+//            // TODO: Should be unique to a device.
+//            'deviceSerialNumber': '',
+//          }
+//        },
       },
       grantType: GrantType.authorizationCode,
       // The proof key parameters set in this method are only for example and shall not be used.
