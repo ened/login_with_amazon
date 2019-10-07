@@ -1,3 +1,9 @@
+## 0.0.3
+
+* Fetch user details on Plugin instantiation.
+* Introduce the Authorization object for detailed authentication response 
+  including token and user.
+
 ## 0.0.2
 
 * Move to Dart library structure
