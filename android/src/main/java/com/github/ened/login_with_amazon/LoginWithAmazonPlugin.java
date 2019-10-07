@@ -300,6 +300,8 @@ public class LoginWithAmazonPlugin
         @Override
         public void onListen(Object o, EventSink eventSink) {
           userStreamEventSink = eventSink;
+
+          fetchCurrentUser();
         }
 
         @Override
