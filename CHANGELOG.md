@@ -1,3 +1,7 @@
+## 0.0.5
+
+* Resolve memory leaks
+
 ## 0.0.4
 
 * Unregister listener when view destroyed (Android)

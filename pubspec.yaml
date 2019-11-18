@@ -1,6 +1,6 @@
 name: login_with_amazon
 description: Implements the LoginWithAmazon SDK as a Flutter plugin.
-version: 0.0.4
+version: 0.0.5
 author: sebastian.roth@gmail.com
 homepage: https://github.com/ened/login_with_amazon
 
