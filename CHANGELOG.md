@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Unregister listener when view destroyed (Android)
+
 ## 0.0.3
 
 * Fetch user details on Plugin instantiation.
