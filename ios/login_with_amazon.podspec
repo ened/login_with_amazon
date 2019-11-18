@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'login_with_amazon'
-  s.version          = '0.0.2'
+  s.version          = '0.0.4'
   s.summary          = 'Implements the LoginWithAmazon SDK as a Flutter plugin.'
   s.description      = <<-DESC
 A new flutter plugin project.
