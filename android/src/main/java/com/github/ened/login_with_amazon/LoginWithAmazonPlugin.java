@@ -4,10 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.amazon.identity.auth.device.AuthError;
 import com.amazon.identity.auth.device.api.Listener;
 import com.amazon.identity.auth.device.api.SDKInfo;
@@ -20,15 +18,6 @@ import com.amazon.identity.auth.device.api.authorization.Scope;
 import com.amazon.identity.auth.device.api.authorization.ScopeFactory;
 import com.amazon.identity.auth.device.api.authorization.User;
 import com.amazon.identity.auth.device.api.workflow.RequestContext;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
@@ -41,12 +30,19 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.ViewDestroyListener;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.json.JSONObject;
 
 /** LoginWithAmazonPlugin */
 public class LoginWithAmazonPlugin
     implements ActivityLifecycleListener, MethodCallHandler, ViewDestroyListener {
 
   private static final String TAG = "LoginWithAmazon";
+  private AuthorizeListener authorizeListener;
 
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
@@ -178,6 +174,13 @@ public class LoginWithAmazonPlugin
   public boolean onViewDestroy(FlutterNativeView flutterNativeView) {
     authResult = null;
 
+    if (requestContext != null && authorizeListener != null) {
+      requestContext.unregisterListener(authorizeListener);
+    }
+
+    requestContext = null;
+    authorizeListener = null;
+
     return false;
   }
 
@@ -187,7 +190,7 @@ public class LoginWithAmazonPlugin
     }
 
     requestContext = RequestContext.create(context);
-    requestContext.registerListener(
+    authorizeListener =
         new AuthorizeListener() {
           @Override
           public void onSuccess(final AuthorizeResult authorizeResult) {
@@ -249,7 +252,9 @@ public class LoginWithAmazonPlugin
                   }
                 });
           }
-        });
+        };
+
+    requestContext.registerListener(authorizeListener);
   }
 
   private Map<String, Object> userToMap(@Nullable User user) {
