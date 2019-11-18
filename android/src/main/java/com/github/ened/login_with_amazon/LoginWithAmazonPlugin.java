@@ -42,22 +42,17 @@ public class LoginWithAmazonPlugin
     implements ActivityLifecycleListener, MethodCallHandler, ViewDestroyListener {
 
   private static final String TAG = "LoginWithAmazon";
-  private AuthorizeListener authorizeListener;
 
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
     final MethodChannel channel =
         new MethodChannel(registrar.messenger(), "com.github.ened/login_with_amazon");
-    LoginWithAmazonPlugin plugin = new LoginWithAmazonPlugin(registrar.activeContext());
+    LoginWithAmazonPlugin plugin = new LoginWithAmazonPlugin(registrar.context());
     channel.setMethodCallHandler(plugin);
 
     final EventChannel userChannel =
         new EventChannel(registrar.messenger(), "com.github.ened/login_with_amazon/user");
     userChannel.setStreamHandler(plugin.userStreamHandler);
-
-    final EventChannel authorizationChannel =
-        new EventChannel(registrar.messenger(), "com.github.ened/login_with_amazon/authorization");
-    authorizationChannel.setStreamHandler(plugin.authorizationStreamHandler);
 
     registrar.addViewDestroyListener(plugin);
 
@@ -76,7 +71,6 @@ public class LoginWithAmazonPlugin
   private Handler mainThreadHandler = new Handler();
 
   @Nullable private EventSink userStreamEventSink;
-  @Nullable private EventSink authorizationEventSink;
 
   private LoginWithAmazonPlugin(Context context) {
     this.context = context;
@@ -174,12 +168,10 @@ public class LoginWithAmazonPlugin
   public boolean onViewDestroy(FlutterNativeView flutterNativeView) {
     authResult = null;
 
-    if (requestContext != null && authorizeListener != null) {
-      requestContext.unregisterListener(authorizeListener);
+    if (userStreamEventSink != null) {
+      userStreamEventSink.endOfStream();
     }
-
-    requestContext = null;
-    authorizeListener = null;
+    userStreamEventSink = null;
 
     return false;
   }
@@ -190,7 +182,8 @@ public class LoginWithAmazonPlugin
     }
 
     requestContext = RequestContext.create(context);
-    authorizeListener =
+
+    AuthorizeListener authorizeListener =
         new AuthorizeListener() {
           @Override
           public void onSuccess(final AuthorizeResult authorizeResult) {
@@ -312,19 +305,6 @@ public class LoginWithAmazonPlugin
         @Override
         public void onCancel(Object o) {
           userStreamEventSink = null;
-        }
-      };
-
-  private final StreamHandler authorizationStreamHandler =
-      new StreamHandler() {
-        @Override
-        public void onListen(Object o, EventSink eventSink) {
-          authorizationEventSink = eventSink;
-        }
-
-        @Override
-        public void onCancel(Object o) {
-          authorizationEventSink = null;
         }
       };
 }
